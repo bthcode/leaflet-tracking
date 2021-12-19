@@ -2,7 +2,7 @@ import sys
 import random
 from flask import Flask, render_template, jsonify
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 
 
 BASECOORDS = [-72, 43]
@@ -11,6 +11,7 @@ BASECOORDS = [-72, 43]
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 
 
