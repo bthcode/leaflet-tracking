@@ -19,16 +19,15 @@ function makeMap() {
         });
 
 
-    T = new Track( icon, mymap );
-    for (var i=0; i<20; i += 1) {
-        T.addPoint( BASECOORDS[0] + i*0.025, BASECOORDS[1], 25, i ); 
-    }
-    T.render( -1, 10 );
+    O = new OwnShip( mymap );
+    O.addPoint( BASECOORDS[0], BASECOORDS[1], 0, 0 );
+    O.activateAim(30);
     
     setInterval( function() {
-        var pt = T.getLatestPosition();
-        T.addPoint(pt.lat + 0.025, pt.lon + 0.025, pt.rotation + 10, pt.time + 1);
-        T.render(-1, 10);
+        var pt = O.getLatestPosition();
+        O.addPoint(pt.lat + 0.025, pt.lon + 0.025, pt.rotation + 10, pt.time + 1);
+        O.render(-1, 10);
+        mymap.panTo([pt.lat + 0.025, pt.lon + 0.025, pt.rotation + 1]);
     } , 500);
    
 }

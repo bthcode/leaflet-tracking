@@ -85,6 +85,8 @@ class Track {
 
         this.p.setLatLngs(pts);
 
+        return pt;
+
     }
 
 
@@ -109,7 +111,7 @@ class Track {
 };
 
 class OwnShip {
-    constructor(lat,lon,rotation,map_handle) {
+    constructor(map_handle) {
         // Make an icon
         this.icon = new L.icon({
             iconUrl: '/static/plane.png',
@@ -127,37 +129,28 @@ class OwnShip {
         this.track = new Track(this.icon, this.map_handle);
         this.sector = null; // target wedge
         this.sector_span = 0;
-        this.render(-1, 10);
     }
 
-    getPosition() {
-        var pt = this.track.getLatestPosition();
-        return [pt.lat, pt.lon, pt.rotation];
+    getLatestPosition() {
+        return this.track.getLatestPosition();
     } 
 
-    setPosition(lat, lon, rotation, time) {
+    addPoint(lat,lon,rotation,time) {
         this.track.addPoint(lat,lon,rotation,time);
-
-
-        // update aim sector
-        if (this.sector !== null) {
-            this.sector.setCenter([this.lat, this.lon]);
-            this.sector.setStartBearing(rotation + 90 - this.sector_span/2);
-            this.sector.setEndBearing(rotation + 90 + this.sector_span/2);
-            this.sector.setLatLngs();
-        }
     }
 
     activateAim(span) {
         this.sector_span = span;
+        var pt = this.getLatestPosition();
+        console.log(pt, this.sector_span);
         if (this.sector === null) {
             // draw donut
             this.sector = new L.sector({
-                center: [this.lat, this.lon],
+                center: new L.LatLng(pt.lat, pt.lon),
                 innerRadius:  50000,
                 outerRadius: 100000,
-                startBearing: this.rotation + 90 -this.sector_span/2,
-                endBearing: this.rotation + 90 +this.sector_span/2,
+                startBearing: pt.rotation + 90 - this.sector_span/2,
+                endBearing: pt.rotation + 90 + this.sector_span/2,
                 fill: true,
                 fillColor: '#cc00cc',
                 fillOpacity: 0.5,
@@ -176,7 +169,14 @@ class OwnShip {
     }
 
     render( at_time, duration ) {
-        this.track.render(at_time, duration);
+        var pt = this.track.render(at_time, duration);
+        // update aim sector
+        if (this.sector !== null) {
+            this.sector.setCenter([pt.lat, pt.lon]);
+            this.sector.setStartBearing(pt.rotation + 90 - this.sector_span/2);
+            this.sector.setEndBearing(pt.rotation + 90 + this.sector_span/2);
+            this.sector.setLatLngs();
+        }    
     }
 
     unrender() {
