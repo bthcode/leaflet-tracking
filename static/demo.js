@@ -1,3 +1,4 @@
+ICONSIZE = 26;
 BASECOORDS = [42, -73];
 
 function makeMap() {
@@ -6,12 +7,28 @@ function makeMap() {
     mymap = L.map('llmap').setView(BASECOORDS, 8);
     L.tileLayer(TILE_URL, {attribution: MB_ATTR}).addTo(mymap);
 
-    let O = new OwnShip( BASECOORDS[0], BASECOORDS[1], 25, mymap );
-    O.activateAim(30);
+    icon = new L.icon({
+            iconUrl: '/static/plane.png',
+            shadowUrl: '/static/empty.png',
 
-     setInterval( function() {
-        pos = O.getPosition();
-        O.setPosition(pos[0], pos[1]+0.01, pos[2] + 10);
+            iconSize:     [ICONSIZE, ICONSIZE], // size of the icon
+            shadowSize:   [ICONSIZE, ICONSIZE], // size of the shadow
+            iconAnchor:   [ICONSIZE/2, ICONSIZE/2], // point of the icon which will correspond to marker's location
+            shadowAnchor: [ICONSIZE/2, ICONSIZE/2],  // the same for the shadow
+            popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+        });
+
+
+    T = new Track( icon, mymap );
+    for (var i=0; i<20; i += 1) {
+        T.addPoint( BASECOORDS[0] + i*0.025, BASECOORDS[1], 25, i ); 
+    }
+    T.render( -1, 10 );
+    
+    setInterval( function() {
+        var pt = T.getLatestPosition();
+        T.addPoint(pt.lat + 0.025, pt.lon + 0.025, pt.rotation + 10, pt.time + 1);
+        T.render(-1, 10);
     } , 500);
    
 }
